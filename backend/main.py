@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
 from transformers import pipeline
+from fastapi.middleware.cors import CORSMiddleware
 from groq import Groq
 from dotenv import load_dotenv
 import os
@@ -43,7 +44,7 @@ def humanize(data: TextInput):
     response = client.chat.completions.create(
         model="llama-3.3-70b-versatile",
         messages=[
-            {"role": "system", "content": "Rewrite the given text to sound completely natural and human. Vary sentence length, use contractions, add subtle imperfections, and remove any robotic or overly formal phrasing. Keep the original meaning intact."},
+            {"role": "system", "content": "Rewrite the given text to sound completely natural and human. Vary sentence length, use contractions, and remove robotic phrasing. Keep the original meaning. Return ONLY the rewritten text, no explanations, no notes, nothing else."},
             {"role": "user", "content": data.text}
         ]
     )
@@ -51,6 +52,11 @@ def humanize(data: TextInput):
     return {"humanized": result}
 
 
-
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
