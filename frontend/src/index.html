@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Humanizer & Detector</title>
+  <script type="module" src="/main.js" defer></script>
+</head>
+<body>
+  <div class="background-glow"></div>
+  <main class="app-container">
+    <header class="header">
+      <h1>AI Humanizer & Detector</h1>
+      <p class="subtitle">Analyze and refine your text with ease</p>
+    </header>
+
+    <div class="input-section">
+      <textarea id="input-text" rows="8" placeholder="Paste your text here..."></textarea>
+    </div>
+    
+    <div class="actions">
+      <button id="btn-detect" class="btn btn-detect">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M11.251.068a.5.5 0 0 1 .227.58L9.677 6.5H13a.5.5 0 0 1 .364.843l-8 8.5a.5.5 0 0 1-.842-.49L6.323 9.5H3a.5.5 0 0 1-.364-.843l8-8.5a.5.5 0 0 1 .615-.09z"/></svg>
+        Detect AI
+      </button>
+      <button id="btn-humanize" class="btn btn-humanize">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M15.5 8.516a7.5 7.5 0 1 1-9.462-7.24A1 1 0 0 1 7 0h2a1 1 0 0 1 .962 1.276 7.503 7.503 0 0 1 5.538 7.24zm-1.5 0a6.5 6.5 0 1 0-7.859-6.381A2.001 2.001 0 0 0 8 4h.001a2 2 0 0 0 1.858-1.865A6.5 6.5 0 0 0 14 8.516z"/></svg>
+        Humanize
+      </button>
+    </div>
+    
+    <div id="result" class="result-area hidden"></div>
+  </main>
+</body>
+</html>
