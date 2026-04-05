@@ -1,4 +1,9 @@
 from fastapi import FastAPI, UploadFile, File, HTTPException
+from fastapi.responses import StreamingResponse
+from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import A4
+from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
 from groq import Groq
@@ -78,16 +83,57 @@ def detect(data: TextInput):
         "human_percent": round(combined_human * 100, 2)
     }
 
+def chunk_by_paragraphs(text: str, max_chunk_size=1000):
+    paragraphs = text.split('\n')
+    chunks = []
+    current_chunk = []
+    current_len = 0
+    
+    for para in paragraphs:
+        if current_len + len(para) <= max_chunk_size:
+            current_chunk.append(para)
+            current_len += len(para) + 1
+        else:
+            if current_chunk:
+                chunks.append('\n'.join(current_chunk))
+            current_chunk = [para]
+            current_len = len(para) + 1
+            
+    if current_chunk:
+        chunks.append('\n'.join(current_chunk))
+        
+    return chunks
+
 @app.post("/humanize")
 def humanize(data: TextInput):
-    response = client.chat.completions.create(
-        model="llama-3.3-70b-versatile",
-        messages=[
-            {"role": "system", "content": "Rewrite the given text to sound completely natural and human. Vary sentence length, use contractions, and remove robotic phrasing. Keep the original meaning. Return ONLY the rewritten text, no explanations, no notes, nothing else."},
-            {"role": "user", "content": data.text}
-        ]
-    )
-    result = response.choices[0].message.content
+    if not data.text.strip():
+        return {"humanized": ""}
+
+    chunks = chunk_by_paragraphs(data.text, max_chunk_size=1000)
+    humanized_chunks = []
+    
+    prompt = "You are a text rewriter. Rewrite the given text to sound completely natural and human. IMPORTANT RULES: Keep ALL content including names, titles, dates, numbers, headings, and metadata. Do NOT summarize, skip, condense, or remove any content. Rewrite every single line. Use contractions, vary sentence length, remove robotic phrasing. Return ONLY the rewritten text, nothing else."
+    
+    for chunk in chunks:
+        if not chunk.strip():
+            humanized_chunks.append(chunk)
+            continue
+            
+        try:
+            response = client.chat.completions.create(
+                model="llama-3.3-70b-versatile",
+                messages=[
+                    {"role": "system", "content": prompt},
+                    {"role": "user", "content": chunk}
+                ],
+                temperature=0.3
+            )
+            humanized_chunks.append(response.choices[0].message.content.strip())
+        except Exception as e:
+            print(f"Error humanizing chunk: {e}")
+            humanized_chunks.append(chunk) # Fallback to original text
+
+    result = "\n\n".join(humanized_chunks)
     return {"humanized": result}
 
 @app.post("/extract")
@@ -113,3 +159,48 @@ async def extract(file: UploadFile = File(...)):
         raise HTTPException(status_code=500, detail=f"Error extracting text: {str(e)}")
         
     return {"text": extracted_text.strip()}
+
+@app.post("/export/docx")
+def export_docx(data: TextInput):
+    doc = docx.Document()
+    doc.add_heading("Humanized Text", 0)
+    for paragraph in data.text.split('\n'):
+        if paragraph.strip():
+            doc.add_paragraph(paragraph.strip())
+            
+    file_stream = io.BytesIO()
+    doc.save(file_stream)
+    file_stream.seek(0)
+    
+    return StreamingResponse(
+        file_stream, 
+        media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document", 
+        headers={"Content-Disposition": "attachment; filename=humanized.docx"}
+    )
+
+@app.post("/export/pdf")
+def export_pdf(data: TextInput):
+    file_stream = io.BytesIO()
+    doc = SimpleDocTemplate(file_stream, pagesize=A4,
+                            rightMargin=72, leftMargin=72,
+                            topMargin=72, bottomMargin=18)
+    styles = getSampleStyleSheet()
+    Story = []
+    
+    Story.append(Paragraph("Humanized Text", styles["Title"]))
+    Story.append(Spacer(1, 12))
+    
+    for paragraph in data.text.split('\n'):
+        if paragraph.strip():
+            Story.append(Paragraph(paragraph.strip(), styles["Normal"]))
+            Story.append(Spacer(1, 6))
+            
+    doc.build(Story)
+    file_stream.seek(0)
+    
+    return StreamingResponse(
+        file_stream, 
+        media_type="application/pdf", 
+        headers={"Content-Disposition": "attachment; filename=humanized.pdf"}
+    )
+
