@@ -1,6 +1,5 @@
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from pydantic import BaseModel
-from transformers import pipeline
 from fastapi.middleware.cors import CORSMiddleware
 from groq import Groq
 from dotenv import load_dotenv
@@ -23,36 +22,12 @@ app.add_middleware(
 
 client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
-detector = pipeline("text-classification", model="Hello-SimpleAI/chatgpt-detector-roberta")
-
 class TextInput(BaseModel):
     text: str
 
 @app.get("/health")
 def health():
     return {"status": "ok"}
-
-def chunk_text(text: str, max_chunk_size=400):
-    sentences = re.split(r'(?<=[.!?])\s+', text.strip())
-    chunks = []
-    current_chunk = ""
-    
-    for sentence in sentences:
-        if not sentence.strip():
-            continue
-        if len(current_chunk) + len(sentence) <= max_chunk_size:
-            current_chunk += sentence + " "
-        else:
-            if current_chunk:
-                chunks.append(current_chunk.strip())
-            current_chunk = sentence + " "
-            
-    if current_chunk.strip():
-        chunks.append(current_chunk.strip())
-        
-    if not chunks:
-        chunks = [text[:max_chunk_size]] if text else [""]
-    return chunks
 
 @app.post("/detect")
 def detect(data: TextInput):
@@ -64,35 +39,43 @@ def detect(data: TextInput):
             "human_percent": 0.0
         }
 
-    chunks = chunk_text(data.text, max_chunk_size=400)
-    total_ai = 0.0
-    total_human = 0.0
-    
-    for chunk in chunks:
-        if not chunk: continue
-        # Safe-guard by aggressively truncating and explicitly requesting truncation
-        result = detector(chunk[:2000], truncation=True, max_length=512)
-        label = result[0]['label']
-        score = result[0]['score']
+    try:
+        groq_response = client.chat.completions.create(
+            model="llama-3.3-70b-versatile",
+            messages=[
+                {"role": "system", "content": "You are an expert AI text detector. Analyze the given text carefully. Consider these signals - AI text: perfect grammar, formal tone, no typos, repetitive structure, buzzwords, no personal stories. Human text: casual language, typos, contractions, personal experiences, emotional language, slang, incomplete sentences. Be accurate - do not mark clearly human casual text as AI. Return ONLY a single integer 0-100 representing AI probability. 0=definitely human, 100=definitely AI."},
+                {"role": "user", "content": data.text[:8000]} # Increase limit since LLM can handle it
+            ],
+            temperature=0.1
+        )
         
-        if label == "Human":
-            total_human += score
-            total_ai += (1 - score)
+        # Parse the integer response
+        groq_text = groq_response.choices[0].message.content.strip()
+        numbers = re.findall(r'\d+', groq_text)
+        if numbers:
+            # Take the first number found, clamped between 0 and 100
+            groq_score = min(max(float(numbers[0]), 0.0), 100.0)
+            groq_ai_percent = groq_score / 100.0
         else:
-            total_ai += score
-            total_human += (1 - score)
+            print(f"Groq parsing failed. Raw response: {groq_text}")
+            groq_ai_percent = 0.5 # Default to unsure if parse fails
             
-    avg_ai = total_ai / len(chunks)
-    avg_human = total_human / len(chunks)
+    except Exception as e:
+        print("Groq detection failed:", e)
+        groq_ai_percent = 0.5 # Fallback
+        
+    combined_ai = groq_ai_percent
+    combined_human = 1.0 - combined_ai
     
-    final_label = "AI" if avg_ai > 0.5 else "Human"
-    final_score = avg_ai if final_label == "AI" else avg_human
+    final_label = "AI" if combined_ai > 0.5 else "Human"
+    final_score = combined_ai if final_label == "AI" else combined_human
+
     
     return {
         "label": final_label,
         "score": round(final_score, 4),
-        "ai_percent": round(avg_ai * 100, 2),
-        "human_percent": round(avg_human * 100, 2)
+        "ai_percent": round(combined_ai * 100, 2),
+        "human_percent": round(combined_human * 100, 2)
     }
 
 @app.post("/humanize")
@@ -130,6 +113,3 @@ async def extract(file: UploadFile = File(...)):
         raise HTTPException(status_code=500, detail=f"Error extracting text: {str(e)}")
         
     return {"text": extracted_text.strip()}
-
-
-
