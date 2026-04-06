@@ -27,6 +27,14 @@ window.addEventListener("DOMContentLoaded", () => {
     `;
   };
 
+  const showToast = (msg) => {
+    const toast = document.createElement("div")
+    toast.textContent = msg
+    toast.style.cssText = "position:fixed;bottom:20px;right:20px;background:#1e1e2e;color:#fff;padding:12px 20px;border-radius:8px;border:1px solid rgba(255,255,255,0.1);font-size:0.85rem;z-index:9999;"
+    document.body.appendChild(toast)
+    setTimeout(() => toast.remove(), 3000)
+  }
+
   btnDetect.addEventListener("click", async () => {
     const text = inputText.value.trim();
     if (!text) {
@@ -43,7 +51,14 @@ window.addEventListener("DOMContentLoaded", () => {
         body: JSON.stringify({ text })
       });
 
-      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+      if (!response.ok) {
+        let errorMsg = `HTTP error! status: ${response.status}`;
+        try {
+          const errData = await response.json();
+          if (errData.detail) errorMsg = errData.detail;
+        } catch(e) {}
+        throw new Error(errorMsg);
+      }
       const data = await response.json();
 
       const isAI = data.ai_percent > 50;
@@ -55,33 +70,33 @@ window.addEventListener("DOMContentLoaded", () => {
           <div class="badge ${badgeClass}">${data.label}</div>
         </div>
         
-        <div class="progress-group">
-          <div class="progress-header">
-            <span>AI Probability</span>
-            <span>${data.ai_percent}%</span>
+        <div class="donut-container">
+          <div class="donut-chart-wrapper">
+            <div class="donut-chart" style="--human-val: 0"></div>
+            <div class="donut-hole-text">
+              <div class="donut-score-label">AI Score</div>
+              <div class="donut-score-value">${data.ai_percent}%</div>
+            </div>
           </div>
-          <div class="progress-bar-bg">
-            <div class="progress-bar-fill fill-red" style="width: 0%"></div>
-          </div>
-        </div>
-
-        <div class="progress-group">
-          <div class="progress-header">
-            <span>Human Probability</span>
-            <span>${data.human_percent}%</span>
-          </div>
-          <div class="progress-bar-bg">
-            <div class="progress-bar-fill fill-green" style="width: 0%"></div>
+          
+          <div class="donut-legend">
+            <div class="legend-item">
+              <div class="legend-dot ai"></div>
+              <span>AI</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-dot human"></div>
+              <span>Human</span>
+            </div>
           </div>
         </div>
       `;
 
       // Trigger animations
       setTimeout(() => {
-        const fills = resultDiv.querySelectorAll('.progress-bar-fill');
-        if (fills.length >= 2) {
-          fills[0].style.width = `${data.ai_percent}%`;
-          fills[1].style.width = `${data.human_percent}%`;
+        const chart = resultDiv.querySelector('.donut-chart');
+        if (chart) {
+          chart.style.setProperty('--human-val', data.human_percent);
         }
       }, 50);
 
@@ -106,7 +121,14 @@ window.addEventListener("DOMContentLoaded", () => {
         body: JSON.stringify({ text })
       });
 
-      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+      if (!response.ok) {
+        let errorMsg = `HTTP error! status: ${response.status}`;
+        try {
+          const errData = await response.json();
+          if (errData.detail) errorMsg = errData.detail;
+        } catch(e) {}
+        throw new Error(errorMsg);
+      }
       const data = await response.json();
 
       humanizedText = data.humanized;
@@ -137,7 +159,14 @@ window.addEventListener("DOMContentLoaded", () => {
         body: formData
       });
 
-      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+      if (!response.ok) {
+        let errorMsg = `HTTP error! status: ${response.status}`;
+        try {
+          const errData = await response.json();
+          if (errData.detail) errorMsg = errData.detail;
+        } catch(e) {}
+        throw new Error(errorMsg);
+      }
 
       const data = await response.json();
       inputText.value = data.text;
@@ -160,6 +189,7 @@ window.addEventListener("DOMContentLoaded", () => {
     a.download = "humanized.txt";
     a.click();
     URL.revokeObjectURL(url);
+    showToast("✅ Downloaded! Check your Downloads folder.");
   });
 
   // Generic export fetcher for endpoint downloads

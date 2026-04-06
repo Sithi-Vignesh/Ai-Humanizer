@@ -15,47 +15,54 @@
 <body>
   <div class="background-glow"></div>
   <main class="app-container">
-    <header class="header">
+    <header class="header" style="grid-column: 1 / -1;">
       <h1>AI Humanizer & Detector</h1>
       <p class="subtitle">Analyze and refine your text with ease</p>
     </header>
 
-    <div class="input-section">
-      <textarea id="input-text" rows="8" placeholder="Paste your text here..."></textarea>
-      
-      <div class="file-upload-wrapper" style="margin-top: 1rem; text-align: right;">
-        <label for="file-upload" class="btn" style="display: inline-flex; width: auto; background-color: rgba(255,255,255,0.05); border: 1px dashed rgba(255,255,255,0.2); color: var(--text-secondary); cursor: pointer; padding: 0.5rem 1rem; font-size: 0.85rem;">
-           <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16"><path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/><path d="M7.646 1.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 2.707V11.5a.5.5 0 0 1-1 0V2.707L5.354 4.854a.5.5 0 1 1-.708-.708l3-3z"/></svg>
-           Upload Document (.pdf, .docx)
-        </label>
-        <input type="file" id="file-upload" accept=".pdf,.docx" style="display: none;" />
+    <div class="left-pane">
+      <div class="input-section">
+        <textarea id="input-text" rows="8" placeholder="Paste your text here..."></textarea>
+        
+        <div class="file-upload-wrapper" style="margin-top: 1rem; text-align: right;">
+          <label for="file-upload" class="btn" style="display: inline-flex; width: auto; background-color: rgba(255,255,255,0.05); border: 1px dashed rgba(255,255,255,0.2); color: var(--text-secondary); cursor: pointer; padding: 0.5rem 1rem; font-size: 0.85rem;">
+             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16"><path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/><path d="M7.646 1.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 2.707V11.5a.5.5 0 0 1-1 0V2.707L5.354 4.854a.5.5 0 1 1-.708-.708l3-3z"/></svg>
+             Upload Document (.pdf, .docx)
+          </label>
+          <input type="file" id="file-upload" accept=".pdf,.docx" style="display: none;" />
+          <div style="margin-top: 0.5rem; font-size: 0.75rem; color: rgba(255,255,255,0.4); text-align: right;">
+            ⚠️ Note: Only text content will be preserved. Images, tables, and formatting will not be carried over.
+          </div>
+        </div>
+      </div>
+
+      <div class="actions" style="margin-top: 1rem;">
+        <button id="btn-detect" class="btn btn-detect">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+            <path
+              d="M11.251.068a.5.5 0 0 1 .227.58L9.677 6.5H13a.5.5 0 0 1 .364.843l-8 8.5a.5.5 0 0 1-.842-.49L6.323 9.5H3a.5.5 0 0 1-.364-.843l8-8.5a.5.5 0 0 1 .615-.09z" />
+          </svg>
+          Detect AI
+        </button>
+        <button id="btn-humanize" class="btn btn-humanize">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+            <path
+              d="M15.5 8.516a7.5 7.5 0 1 1-9.462-7.24A1 1 0 0 1 7 0h2a1 1 0 0 1 .962 1.276 7.503 7.503 0 0 1 5.538 7.24zm-1.5 0a6.5 6.5 0 1 0-7.859-6.381A2.001 2.001 0 0 0 8 4h.001a2 2 0 0 0 1.858-1.865A6.5 6.5 0 0 0 14 8.516z" />
+          </svg>
+          Humanize
+        </button>
       </div>
     </div>
 
-    <div class="actions">
-      <button id="btn-detect" class="btn btn-detect">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-          <path
-            d="M11.251.068a.5.5 0 0 1 .227.58L9.677 6.5H13a.5.5 0 0 1 .364.843l-8 8.5a.5.5 0 0 1-.842-.49L6.323 9.5H3a.5.5 0 0 1-.364-.843l8-8.5a.5.5 0 0 1 .615-.09z" />
-        </svg>
-        Detect AI
-      </button>
-      <button id="btn-humanize" class="btn btn-humanize">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-          <path
-            d="M15.5 8.516a7.5 7.5 0 1 1-9.462-7.24A1 1 0 0 1 7 0h2a1 1 0 0 1 .962 1.276 7.503 7.503 0 0 1 5.538 7.24zm-1.5 0a6.5 6.5 0 1 0-7.859-6.381A2.001 2.001 0 0 0 8 4h.001a2 2 0 0 0 1.858-1.865A6.5 6.5 0 0 0 14 8.516z" />
-        </svg>
-        Humanize
-      </button>
-    </div>
-
-    <div id="result" class="result-area hidden"></div>
-    
-    <div id="export-section" class="actions" style="display: none; margin-top: 0.5rem; border-top: 1px solid var(--border); padding-top: 1.5rem; gap: 0.5rem; justify-content: center; align-items: center;">
-      <span style="color: var(--text-secondary); font-size: 0.9rem; font-weight: 500; margin-right: 0.5rem;">Export as:</span>
-      <button id="btn-export-txt" class="btn" style="flex: unset; padding: 0.5rem 1.25rem; background-color: rgba(255,255,255,0.05); border: 1px solid var(--border);">TXT</button>
-      <button id="btn-export-docx" class="btn" style="flex: unset; padding: 0.5rem 1.25rem; background-color: rgba(255,255,255,0.05); border: 1px solid var(--border);">DOCX</button>
-      <button id="btn-export-pdf" class="btn" style="flex: unset; padding: 0.5rem 1.25rem; background-color: rgba(255,255,255,0.05); border: 1px solid var(--border);">PDF</button>
+    <div class="right-pane" style="display: flex; flex-direction: column;">
+      <div id="result" class="result-area hidden" style="flex: 1;"></div>
+      
+      <div id="export-section" class="actions" style="display: none; margin-top: auto; border-top: 1px solid var(--border); padding-top: 1rem; gap: 0.5rem; justify-content: center; align-items: center;">
+        <span style="color: var(--text-secondary); font-size: 0.9rem; font-weight: 500; margin-right: 0.5rem;">Export as:</span>
+        <button id="btn-export-txt" class="btn" style="flex: unset; padding: 0.5rem 1.25rem; background-color: rgba(255,255,255,0.05); border: 1px solid var(--border);">TXT</button>
+        <button id="btn-export-docx" class="btn" style="flex: unset; padding: 0.5rem 1.25rem; background-color: rgba(255,255,255,0.05); border: 1px solid var(--border);">DOCX</button>
+        <button id="btn-export-pdf" class="btn" style="flex: unset; padding: 0.5rem 1.25rem; background-color: rgba(255,255,255,0.05); border: 1px solid var(--border);">PDF</button>
+      </div>
     </div>
   </main>
 </body>

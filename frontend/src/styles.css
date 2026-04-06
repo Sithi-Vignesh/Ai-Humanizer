@@ -47,16 +47,22 @@ body {
 
 .app-container {
   width: 100%;
-  max-width: 660px;
+  max-width: 1100px;
   background: rgba(20, 27, 45, 0.6);
   backdrop-filter: blur(12px);
   border: 1px solid var(--border);
   border-radius: 16px;
   padding: 2.25rem;
   box-shadow: var(--shadow-lg);
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem 2.5rem;
+}
+
+@media (max-width: 768px) {
+  .app-container {
+    grid-template-columns: 1fr;
+  }
 }
 
 .header {
@@ -91,7 +97,7 @@ textarea {
   font-size: 0.95rem;
   line-height: 1.6;
   resize: vertical;
-  min-height: 180px;
+  min-height: 250px;
   outline: none;
   transition: border-color 0.2s, box-shadow 0.2s;
 }
@@ -244,6 +250,85 @@ textarea::placeholder {
 .fill-red { background-color: var(--ai-red); }
 .fill-green { background-color: var(--human-green); }
 
+/* Donut Chart Styling */
+.donut-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-top: 1rem;
+  padding: 1rem;
+}
+
+.donut-chart-wrapper {
+  position: relative;
+  width: 320px;
+  height: 160px;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+}
+
+.donut-chart {
+  position: absolute;
+  top: 0;
+  width: 320px;
+  height: 320px;
+  border-radius: 50%;
+  background: conic-gradient(
+    from 270deg,
+    var(--human-green) 0%,
+    var(--human-green) calc(var(--human-val, 50) * 0.5%),
+    var(--ai-red) calc(var(--human-val, 50) * 0.5%),
+    var(--ai-red) 50%,
+    transparent 50%,
+    transparent 100%
+  );
+  -webkit-mask-image: radial-gradient(circle at 50% 50%, transparent 62%, black 63%);
+  mask-image: radial-gradient(circle at 50% 50%, transparent 62%, black 63%);
+  animation: loadDonut 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes loadDonut {
+  from { opacity: 0; transform: scale(0.95) translateY(10px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.donut-hole-text {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  text-align: center;
+  padding-bottom: 0.5rem;
+}
+
+.donut-score-value {
+  font-size: 2.8rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1;
+  text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+}
+
+.donut-legend {
+  display: flex;
+  gap: 2rem;
+  margin-top: 1.5rem;
+  width: 100%;
+  justify-content: center;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+.legend-dot.human { width: 14px; height: 14px; border-radius: 50%; background-color: var(--human-green); }
+.legend-dot.ai { width: 14px; height: 14px; border-radius: 50%; background-color: var(--ai-red); }
+
 /* Humanize Result Styling */
 .humanize-result {
   background: rgba(10, 14, 23, 0.6);
@@ -256,6 +341,25 @@ textarea::placeholder {
   border-top: 1px solid var(--border);
   border-right: 1px solid var(--border);
   border-bottom: 1px solid var(--border);
+  max-height: 480px;
+  overflow-y: auto;
+}
+
+/* Custom Scrollbar for humanize-result */
+.humanize-result::-webkit-scrollbar {
+  width: 6px;
+}
+.humanize-result::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+  margin: 0.5rem;
+}
+.humanize-result::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 4px;
+}
+.humanize-result::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.25);
 }
 
 .loading-text {

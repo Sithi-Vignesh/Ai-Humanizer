@@ -63,11 +63,14 @@ def detect(data: TextInput):
             groq_ai_percent = groq_score / 100.0
         else:
             print(f"Groq parsing failed. Raw response: {groq_text}")
-            groq_ai_percent = 0.5 # Default to unsure if parse fails
+            raise HTTPException(status_code=500, detail=f"LLM Parsing failed: {groq_text}")
             
+    except HTTPException:
+        raise
     except Exception as e:
-        print("Groq detection failed:", e)
-        groq_ai_percent = 0.5 # Fallback
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Groq API Error: {str(e)}")
         
     combined_ai = groq_ai_percent
     combined_human = 1.0 - combined_ai
