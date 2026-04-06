@@ -23,11 +23,24 @@
     <div class="left-pane">
       <div class="input-section">
         <textarea id="input-text" rows="8" placeholder="Paste your text here..."></textarea>
-        
+        <div class="strength-selector-wrapper">
+          <span class="strength-label">Humanize Strength:</span>
+          <div id="strength-selector" class="pill-selector">
+            <button class="strength-btn" data-level="light">Light</button>
+            <button class="strength-btn active" data-level="medium">Medium</button>
+            <button class="strength-btn" data-level="heavy">Heavy</button>
+          </div>
+        </div>
         <div class="file-upload-wrapper" style="margin-top: 1rem; text-align: right;">
-          <label for="file-upload" class="btn" style="display: inline-flex; width: auto; background-color: rgba(255,255,255,0.05); border: 1px dashed rgba(255,255,255,0.2); color: var(--text-secondary); cursor: pointer; padding: 0.5rem 1rem; font-size: 0.85rem;">
-             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16"><path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/><path d="M7.646 1.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 2.707V11.5a.5.5 0 0 1-1 0V2.707L5.354 4.854a.5.5 0 1 1-.708-.708l3-3z"/></svg>
-             Upload Document (.pdf, .docx)
+          <label for="file-upload" class="btn"
+            style="display: inline-flex; width: auto; background-color: rgba(255,255,255,0.05); border: 1px dashed rgba(255,255,255,0.2); color: var(--text-secondary); cursor: pointer; padding: 0.5rem 1rem; font-size: 0.85rem;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
+              <path
+                d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z" />
+              <path
+                d="M7.646 1.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 2.707V11.5a.5.5 0 0 1-1 0V2.707L5.354 4.854a.5.5 0 1 1-.708-.708l3-3z" />
+            </svg>
+            Upload Document (.pdf, .docx)
           </label>
           <input type="file" id="file-upload" accept=".pdf,.docx" style="display: none;" />
           <div style="margin-top: 0.5rem; font-size: 0.75rem; color: rgba(255,255,255,0.4); text-align: right;">
@@ -56,12 +69,17 @@
 
     <div class="right-pane" style="display: flex; flex-direction: column;">
       <div id="result" class="result-area hidden" style="flex: 1;"></div>
-      
-      <div id="export-section" class="actions" style="display: none; margin-top: auto; border-top: 1px solid var(--border); padding-top: 1rem; gap: 0.5rem; justify-content: center; align-items: center;">
-        <span style="color: var(--text-secondary); font-size: 0.9rem; font-weight: 500; margin-right: 0.5rem;">Export as:</span>
-        <button id="btn-export-txt" class="btn" style="flex: unset; padding: 0.5rem 1.25rem; background-color: rgba(255,255,255,0.05); border: 1px solid var(--border);">TXT</button>
-        <button id="btn-export-docx" class="btn" style="flex: unset; padding: 0.5rem 1.25rem; background-color: rgba(255,255,255,0.05); border: 1px solid var(--border);">DOCX</button>
-        <button id="btn-export-pdf" class="btn" style="flex: unset; padding: 0.5rem 1.25rem; background-color: rgba(255,255,255,0.05); border: 1px solid var(--border);">PDF</button>
+
+      <div id="export-section" class="actions"
+        style="display: none; margin-top: auto; border-top: 1px solid var(--border); padding-top: 1rem; gap: 0.5rem; justify-content: center; align-items: center;">
+        <span style="color: var(--text-secondary); font-size: 0.9rem; font-weight: 500; margin-right: 0.5rem;">Export
+          as:</span>
+        <button id="btn-export-txt" class="btn"
+          style="flex: unset; padding: 0.5rem 1.25rem; background-color: rgba(255,255,255,0.05); border: 1px solid var(--border);">TXT</button>
+        <button id="btn-export-docx" class="btn"
+          style="flex: unset; padding: 0.5rem 1.25rem; background-color: rgba(255,255,255,0.05); border: 1px solid var(--border);">DOCX</button>
+        <button id="btn-export-pdf" class="btn"
+          style="flex: unset; padding: 0.5rem 1.25rem; background-color: rgba(255,255,255,0.05); border: 1px solid var(--border);">PDF</button>
       </div>
     </div>
   </main>

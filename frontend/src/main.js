@@ -10,6 +10,16 @@ window.addEventListener("DOMContentLoaded", () => {
   const btnExportPdf = document.getElementById("btn-export-pdf");
 
   let humanizedText = "";
+  let selectedStrength = "medium";
+
+  const strengthBtns = document.querySelectorAll(".strength-btn");
+  strengthBtns.forEach(btn => {
+    btn.addEventListener("click", () => {
+      strengthBtns.forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      selectedStrength = btn.dataset.level;
+    });
+  });
 
   const showLoading = (text) => {
     exportSection.style.display = "none";
@@ -118,7 +128,7 @@ window.addEventListener("DOMContentLoaded", () => {
       const response = await fetch("http://localhost:8000/humanize", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text })
+        body: JSON.stringify({ text, strength: selectedStrength })
       });
 
       if (!response.ok) {

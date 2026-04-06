@@ -29,6 +29,7 @@ client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
 class TextInput(BaseModel):
     text: str
+    strength: str = "medium"
 
 @app.get("/health")
 def health():
@@ -115,7 +116,14 @@ def humanize(data: TextInput):
     chunks = chunk_by_paragraphs(data.text, max_chunk_size=1000)
     humanized_chunks = []
     
-    prompt = "You are a text rewriter. Rewrite the given text to sound completely natural and human. IMPORTANT RULES: Keep ALL content including names, titles, dates, numbers, headings, and metadata. Do NOT summarize, skip, condense, or remove any content. Rewrite every single line. Use contractions, vary sentence length, remove robotic phrasing. Return ONLY the rewritten text, nothing else."
+    instructions = {
+        "light": "Keep the tone mostly similar to the original, just fix slight robotic phrasing, adjust grammar smoothly, and resolve disjointed sentences.",
+        "medium": "Rewrite to sound completely natural and human. Use standard contractions, vary sentence length, and remove generic robotic phrasing.",
+        "heavy": "Completely rewrite in a highly conversational, extremely organic style. Sound very human. Use slang where appropriate, strong contractions, and dynamic sentence structure."
+    }
+    strength_instruction = instructions.get(data.strength.lower(), instructions["medium"])
+    
+    prompt = f"You are a text rewriter. {strength_instruction} IMPORTANT RULES: Keep ALL content including names, titles, dates, numbers, headings, and metadata. Do NOT summarize, skip, condense, or remove any content. Rewrite every single line. Return ONLY the rewritten text, nothing else."
     
     for chunk in chunks:
         if not chunk.strip():
