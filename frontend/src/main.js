@@ -66,7 +66,7 @@ window.addEventListener("DOMContentLoaded", () => {
         try {
           const errData = await response.json();
           if (errData.detail) errorMsg = errData.detail;
-        } catch(e) {}
+        } catch (e) { }
         throw new Error(errorMsg);
       }
       const data = await response.json();
@@ -136,7 +136,7 @@ window.addEventListener("DOMContentLoaded", () => {
         try {
           const errData = await response.json();
           if (errData.detail) errorMsg = errData.detail;
-        } catch(e) {}
+        } catch (e) { }
         throw new Error(errorMsg);
       }
       const data = await response.json();
@@ -174,7 +174,7 @@ window.addEventListener("DOMContentLoaded", () => {
         try {
           const errData = await response.json();
           if (errData.detail) errorMsg = errData.detail;
-        } catch(e) {}
+        } catch (e) { }
         throw new Error(errorMsg);
       }
 
