@@ -6,10 +6,8 @@ from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
-from transformers import RobertaTokenizer, RobertaForSequenceClassification
 from groq import Groq
 from dotenv import load_dotenv
-import torch
 import os
 import io
 import fitz
@@ -28,12 +26,6 @@ app.add_middleware(
 )
 
 client = Groq(api_key=os.getenv("GROQ_API_KEY"))
-
-# Load RoBERTa model
-MODEL_PATH = os.path.join(os.path.dirname(__file__), "models", "ai-detector-model-v3")
-tokenizer = RobertaTokenizer.from_pretrained(MODEL_PATH)
-model = RobertaForSequenceClassification.from_pretrained(MODEL_PATH)
-model.eval()
 
 class TextInput(BaseModel):
     text: str
@@ -54,36 +46,46 @@ def detect(data: TextInput):
         }
 
     try:
-        inputs = tokenizer(
-            data.text[:512],
-            return_tensors="pt",
-            truncation=True,
-            max_length=512,
-            padding=True
+        groq_response = client.chat.completions.create(
+            model="llama-3.3-70b-versatile",
+            messages=[
+                {"role": "system", "content": "You are an expert AI text detector. Analyze the given text carefully. Consider these signals - AI text: perfect grammar, formal tone, no typos, repetitive structure, buzzwords, no personal stories. Human text: casual language, typos, contractions, personal experiences, emotional language, slang, incomplete sentences. Be accurate - do not mark clearly human casual text as AI. Return ONLY a single integer 0-100 representing AI probability. 0=definitely human, 100=definitely AI."},
+                {"role": "user", "content": data.text[:8000]} # Increase limit since LLM can handle it
+            ],
+            temperature=0.1
         )
-
-        with torch.no_grad():
-            outputs = model(**inputs)
-            probs = torch.softmax(outputs.logits, dim=1).squeeze()
-
-        # label 0 = human, label 1 = AI (based on V3 training: generated=0 human, generated=1 AI)
-        ai_prob = probs[1].item()
-        human_prob = probs[0].item()
-
-        final_label = "AI" if ai_prob > 0.5 else "Human"
-        final_score = ai_prob if final_label == "AI" else human_prob
-
-        return {
-            "label": final_label,
-            "score": round(final_score, 4),
-            "ai_percent": round(ai_prob * 100, 2),
-            "human_percent": round(human_prob * 100, 2)
-        }
-
+        
+        # Parse the integer response
+        groq_text = groq_response.choices[0].message.content.strip()
+        numbers = re.findall(r'\d+', groq_text)
+        if numbers:
+            # Take the first number found, clamped between 0 and 100
+            groq_score = min(max(float(numbers[0]), 0.0), 100.0)
+            groq_ai_percent = groq_score / 100.0
+        else:
+            print(f"Groq parsing failed. Raw response: {groq_text}")
+            raise HTTPException(status_code=500, detail=f"LLM Parsing failed: {groq_text}")
+            
+    except HTTPException:
+        raise
     except Exception as e:
         import traceback
         traceback.print_exc()
-        raise HTTPException(status_code=500, detail=f"Detection error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Groq API Error: {str(e)}")
+        
+    combined_ai = groq_ai_percent
+    combined_human = 1.0 - combined_ai
+    
+    final_label = "AI" if combined_ai > 0.5 else "Human"
+    final_score = combined_ai if final_label == "AI" else combined_human
+
+    
+    return {
+        "label": final_label,
+        "score": round(final_score, 4),
+        "ai_percent": round(combined_ai * 100, 2),
+        "human_percent": round(combined_human * 100, 2)
+    }
 
 def chunk_by_paragraphs(text: str, max_chunk_size=1000):
     paragraphs = text.split('\n')
@@ -140,7 +142,7 @@ def humanize(data: TextInput):
             humanized_chunks.append(response.choices[0].message.content.strip())
         except Exception as e:
             print(f"Error humanizing chunk: {e}")
-            humanized_chunks.append(chunk)
+            humanized_chunks.append(chunk) # Fallback to original text
 
     result = "\n\n".join(humanized_chunks)
     return {"humanized": result}
@@ -183,7 +185,7 @@ def export_docx(data: TextInput):
     
     return StreamingResponse(
         file_stream, 
-        media_type="application/vnd.openxmlformats-officediacument.wordprocessingml.document", 
+        media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document", 
         headers={"Content-Disposition": "attachment; filename=humanized.docx"}
     )
 
@@ -212,3 +214,4 @@ def export_pdf(data: TextInput):
         media_type="application/pdf", 
         headers={"Content-Disposition": "attachment; filename=humanized.pdf"}
     )
+
