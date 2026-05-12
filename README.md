@@ -1,17 +1,27 @@
-# 🤖 Ai-Humanizer
+# 🧠 AI-Humanizer
 
-A full-stack desktop application that detects AI-generated text and humanizes it with adjustable intensity. Built with a FastAPI backend, Groq LLM API, and a Tauri + Rust desktop frontend.
+A full-stack desktop application that detects AI-generated text and humanizes it with adjustable intensity. Built with FastAPI, a fine-tuned RoBERTa model, Groq LLM, and a Tauri desktop frontend.
+
+---
+
+## ⬇️ Download
+
+> 📦 [Download AI-Humanizer v1.0.0](PASTE_DRIVE_LINK_HERE)
+
+**Requirements:** Windows 10/11 (64-bit) · Python 3.10+ · Free [Groq API key](https://console.groq.com)
+
+See `README.txt` inside the zip for full setup instructions.
 
 ---
 
 ## ✨ Features
 
-- **AI Text Detection** — analyzes text and returns an AI probability score (0–100%) using LLaMA 3.3 70B
-- **3-Level Humanization** — Light, Medium, and Heavy humanization modes with distinct rewriting styles
-- **File Upload Support** — extract and analyze text directly from PDF and DOCX files
-- **Export Results** — download humanized text as PDF or DOCX
-- **Chunk-based Processing** — intelligently splits large documents into paragraphs for accurate humanization
-- **Desktop App** — built with Tauri + Rust for a native desktop experience
+- **AI Text Detection** — fine-tuned RoBERTa model (99.71% accuracy) trained on 50k samples
+- **3-Level Humanization** — Light, Medium, and Heavy modes via Groq LLaMA 3.3 70B
+- **File Upload Support** — extract and analyze text from PDF and DOCX files
+- **Export Results** — download humanized text as TXT, PDF, or DOCX
+- **Chunk-based Processing** — paragraph-by-paragraph processing for accurate long document handling
+- **One-click Launch** — `Start AI-Humanizer.bat` starts backend and app automatically
 
 ---
 
@@ -20,8 +30,9 @@ A full-stack desktop application that detects AI-generated text and humanizes it
 | Layer | Technology |
 |---|---|
 | Backend | FastAPI (Python) |
-| LLM | LLaMA 3.3 70B via Groq API |
-| Frontend | Tauri + Rust |
+| AI Detection | Fine-tuned RoBERTa-base (local) |
+| Humanization | LLaMA 3.3 70B via Groq API |
+| Frontend | Tauri + Vanilla JS |
 | File Processing | PyMuPDF (PDF), python-docx (DOCX) |
 | Export | ReportLab (PDF), python-docx (DOCX) |
 
@@ -32,14 +43,14 @@ A full-stack desktop application that detects AI-generated text and humanizes it
 ```
 Ai-Humanizer/
 ├── backend/
-│   ├── main.py            # FastAPI app — detect, humanize, extract, export endpoints
-│   ├── test_groq.py       # Groq API connection test
-│   └── requirements.txt   # Python dependencies
+│   ├── main.py                       # FastAPI — detect, humanize, extract, export
+│   ├── requirements.txt
+│   └── models/
+│       └── ai-detector-model-v3/     # Fine-tuned RoBERTa (not in repo — in release zip)
 ├── frontend/
-│   ├── src/               # Tauri + Rust frontend source
-│   ├── src-tauri/         # Rust Tauri config
-│   └── package.json
-└── .gitignore
+│   ├── src/                          # Vanilla JS frontend
+│   └── src-tauri/                    # Tauri + Rust config
+└── Start AI-Humanizer.bat            # One-click launcher
 ```
 
 ---
@@ -52,8 +63,8 @@ Ai-Humanizer/
 | POST | `/detect` | Detect if text is AI or Human |
 | POST | `/humanize` | Humanize text with selected strength |
 | POST | `/extract` | Extract text from PDF or DOCX |
-| POST | `/export/pdf` | Export humanized text as PDF |
-| POST | `/export/docx` | Export humanized text as DOCX |
+| POST | `/export/pdf` | Export as PDF |
+| POST | `/export/docx` | Export as DOCX |
 
 ---
 
@@ -61,33 +72,33 @@ Ai-Humanizer/
 
 | Level | Description |
 |---|---|
-| **Light** | Fix robotic phrasing, smooth grammar, resolve disjointed sentences |
-| **Medium** | Rewrite naturally with contractions, varied sentence length |
-| **Heavy** | Fully conversational, slang where appropriate, highly organic style |
+| **Light** | Fix robotic phrasing, smooth grammar |
+| **Medium** | Natural rewrite with contractions, varied sentence length |
+| **Heavy** | Fully conversational, highly organic style |
 
 ---
 
-## 🚀 Getting Started
+## 🤖 AI Detection Model
+
+Detection uses a fine-tuned `roberta-base` model trained on 50,000 balanced samples from the [Kaggle AI vs Human Text dataset](https://www.kaggle.com/datasets/shanegerami/ai-vs-human-text).
+
+- **Accuracy:** 99.71% on 10k test set
+- **Training:** 3 epochs on Google Colab
+- **Note:** Model is included in the release zip but excluded from the repo due to size (~4GB)
+
+---
+
+## 🚀 Dev Setup
 
 ### Backend
-
 ```bash
 cd backend
 pip install -r requirements.txt
-```
-
-Add your Groq API key to a `.env` file:
-```
-GROQ_API_KEY=your_groq_api_key_here
-```
-
-Run the server:
-```bash
+cp .env.example .env   # Add your Groq API key
 uvicorn main:app --reload
 ```
 
 ### Frontend
-
 ```bash
 cd frontend
 npm install
@@ -98,14 +109,14 @@ npm run tauri dev
 
 ## 🔮 Future Improvements
 
-- Fine-tuned RoBERTa model for offline AI detection
-- Sentence-level highlighting of AI vs human text
-- Browser extension version
+- Web version
+- Chunked detection for long documents (beyond 512 tokens)
+- Sentence-level AI highlighting
 - Batch file processing
 
 ---
 
 ## 👨‍💻 Author
 
-**Sithi Vignesh** — CS (AI/ML), VIT Vellore
+**Sithi Vignesh** — CS (AI/ML), VIT Vellore  
 [GitHub](https://github.com/Sithi-Vignesh) | [LinkedIn](https://linkedin.com/in/sithi-vignesh)
