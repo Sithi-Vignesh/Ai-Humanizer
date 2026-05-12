@@ -6,7 +6,7 @@ A full-stack desktop application that detects AI-generated text and humanizes it
 
 ## ⬇️ Download
 
-> 📦 [Download AI-Humanizer v1.0.0](PASTE_DRIVE_LINK_HERE)
+> 📦 [Download AI-Humanizer v1.0.0](https://drive.google.com/file/d/1jnWrKl5LnaMcngMcM5WU3ruaX5DnJV_X/view?usp=sharing)
 
 **Requirements:** Windows 10/11 (64-bit) · Python 3.10+ · Free [Groq API key](https://console.groq.com)
 
