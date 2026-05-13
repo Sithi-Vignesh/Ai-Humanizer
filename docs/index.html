@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI Humanizer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500&display=swap"
+        rel="stylesheet" />
+    <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+
+    <header class="header">
+        <div class="header-inner">
+            <div class="brand">
+                <span class="brand-icon">✦</span>
+                <span class="brand-name">AI <em>Humanizer</em></span>
+            </div>
+            <div class="header-right">
+                <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+                    <span class="sun">☀️</span>
+                    <span class="moon">🌙</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="main">
+
+        <section class="hero">
+            <h1>Make AI text sound <em>human.</em></h1>
+            <p class="hero-sub">Paste your text, upload a document, or start typing — we'll handle the rest.</p>
+        </section>
+
+        <div class="workspace">
+
+            <!-- LEFT PANEL -->
+            <div class="panel panel-left">
+                <div class="panel-toolbar">
+                    <span class="panel-label">Original Text</span>
+                    <div class="toolbar-actions">
+                        <span class="word-count" id="word-count-in">0 words</span>
+                        <label class="upload-btn" for="file-upload" title="Upload PDF or Word file">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                                <polyline points="17 8 12 3 7 8" />
+                                <line x1="12" y1="3" x2="12" y2="15" />
+                            </svg>
+                            Upload
+                        </label>
+                        <input type="file" id="file-upload" accept=".pdf,.docx" hidden />
+                    </div>
+                </div>
+                <textarea id="input-text"
+                    placeholder="Paste your AI-generated text here, or upload a PDF / Word document above…"
+                    spellcheck="false"></textarea>
+
+                <div class="detect-bar" id="detect-bar">
+                    <div class="detect-indicator" id="detect-indicator">
+                        <div class="indicator-dot" id="indicator-dot"></div>
+                        <span id="detect-label">Not analysed yet</span>
+                    </div>
+                    <button class="btn-detect" id="detect-btn">Analyse</button>
+                </div>
+            </div>
+
+            <!-- CENTER CONTROLS -->
+            <div class="center-col">
+                <div class="strength-group">
+                    <span class="strength-label">Strength</span>
+                    <div class="strength-pills">
+                        <button class="pill active" data-value="light">Light</button>
+                        <button class="pill" data-value="medium">Medium</button>
+                        <button class="pill" data-value="heavy">Heavy</button>
+                    </div>
+                </div>
+                <button class="btn-humanize" id="humanize-btn">
+                    <span class="btn-text">Humanize</span>
+                    <span class="btn-arrow">→</span>
+                </button>
+            </div>
+
+            <!-- RIGHT PANEL -->
+            <div class="panel panel-right">
+                <div class="panel-toolbar">
+                    <span class="panel-label">Humanized Text</span>
+                    <div class="toolbar-actions">
+                        <span class="word-count" id="word-count-out">0 words</span>
+                        <button class="icon-btn" id="copy-btn" title="Copy to clipboard">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                            </svg>
+                            Copy
+                        </button>
+                    </div>
+                </div>
+                <textarea id="output-text" placeholder="Your humanized text will appear here…" readonly
+                    spellcheck="false"></textarea>
+
+                <div class="export-bar">
+                    <span class="export-label">Export as</span>
+                    <button class="export-btn" id="export-txt">.TXT</button>
+                    <button class="export-btn" id="export-docx">.DOCX</button>
+                    <button class="export-btn" id="export-pdf">.PDF</button>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- LOADING OVERLAY -->
+        <div class="loading-overlay" id="loading-overlay" hidden>
+            <div class="loading-card">
+                <div class="spinner"></div>
+                <p id="loading-msg">Humanizing your text…</p>
+            </div>
+        </div>
+
+    </main>
+
+    <footer class="footer">
+        <p>AI Humanizer &nbsp;·&nbsp; Built by THUNDER</p>
+    </footer>
+
+    <select id="strength" hidden></select>
+
+    <script src="app.js"></script>
+    <script>
+        const themeToggle = document.getElementById("themeToggle");
+        const html = document.documentElement;
+
+        const saved = localStorage.getItem("theme") || "light";
+        html.setAttribute("data-theme", saved);
+
+        themeToggle.addEventListener("click", () => {
+            const current = html.getAttribute("data-theme");
+            const next = current === "light" ? "dark" : "light";
+            html.setAttribute("data-theme", next);
+            localStorage.setItem("theme", next);
+        });
+
+        // Strength pills
+        const pills = document.querySelectorAll(".pill");
+        const strengthHidden = document.getElementById("strength");
+        strengthHidden.value = "light";
+
+        pills.forEach(pill => {
+            pill.addEventListener("click", () => {
+                pills.forEach(p => p.classList.remove("active"));
+                pill.classList.add("active");
+                strengthHidden.value = pill.dataset.value;
+            });
+        });
+
+        // Loading overlay helpers
+        window.showLoading = (msg) => {
+            document.getElementById("loading-msg").textContent = msg || "Processing…";
+            document.getElementById("loading-overlay").removeAttribute("hidden");
+        };
+        window.hideLoading = () => {
+            document.getElementById("loading-overlay").setAttribute("hidden", "");
+        };
+
+        // Detection result rendering
+        const origDetect = window.renderDetect;
+        function renderDetect(prob) {
+            const pct = (prob * 100).toFixed(1);
+            const dot = document.getElementById("indicator-dot");
+            const label = document.getElementById("detect-label");
+            label.textContent = `${pct}% AI probability`;
+            dot.className = "indicator-dot";
+            if (prob >= 0.7) dot.classList.add("dot-high");
+            else if (prob >= 0.4) dot.classList.add("dot-mid");
+            else dot.classList.add("dot-low");
+        }
+        window.renderDetect = renderDetect;
+    </script>
+</body>
+
+</html>
