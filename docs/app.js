@@ -65,7 +65,7 @@ detectBtn.addEventListener("click", async () => {
             body: JSON.stringify({ text: inputText.value })
         });
         const data = await res.json();
-        renderDetect(data.ai_probability);
+        renderDetect(data.ai_percent / 100);
     } catch {
         showToast("Detection failed. Try again.");
     } finally {
@@ -84,8 +84,8 @@ humanizeBtn.addEventListener("click", async () => {
             body: JSON.stringify({ text: inputText.value, strength: strengthSelect.value || "light" })
         });
         const data = await res.json();
-        outputText.value = data.humanized_text;
-        const words = data.humanized_text.trim().split(/\s+/).filter(Boolean).length;
+        outputText.value = data.humanized;
+        const words = data.humanized.trim().split(/\s+/).filter(Boolean).length;
         wordCountOut.textContent = words + " words";
         showToast("Humanized ✓");
     } catch {
