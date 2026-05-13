@@ -1,235 +1,160 @@
-window.addEventListener("DOMContentLoaded", () => {
-  const inputText = document.getElementById("input-text");
-  const btnDetect = document.getElementById("btn-detect");
-  const btnHumanize = document.getElementById("btn-humanize");
-  const resultDiv = document.getElementById("result");
-  const fileUpload = document.getElementById("file-upload");
-  const exportSection = document.getElementById("export-section");
-  const btnExportTxt = document.getElementById("btn-export-txt");
-  const btnExportDocx = document.getElementById("btn-export-docx");
-  const btnExportPdf = document.getElementById("btn-export-pdf");
+const API_BASE = "http://localhost:8000";
 
-  let humanizedText = "";
-  let selectedStrength = "medium";
+const inputText = document.getElementById("input-text");
+const outputText = document.getElementById("output-text");
+const detectBtn = document.getElementById("detect-btn");
+const humanizeBtn = document.getElementById("humanize-btn");
+const strengthSelect = document.getElementById("strength");
+const wordCountIn = document.getElementById("word-count-in");
+const wordCountOut = document.getElementById("word-count-out");
+const fileUpload = document.getElementById("file-upload");
+const copyBtn = document.getElementById("copy-btn");
+const exportTxt = document.getElementById("export-txt");
+const exportDocx = document.getElementById("export-docx");
+const exportPdf = document.getElementById("export-pdf");
 
-  const strengthBtns = document.querySelectorAll(".strength-btn");
-  strengthBtns.forEach(btn => {
-    btn.addEventListener("click", () => {
-      strengthBtns.forEach(b => b.classList.remove("active"));
-      btn.classList.add("active");
-      selectedStrength = btn.dataset.level;
-    });
-  });
-
-  const showLoading = (text) => {
-    exportSection.style.display = "none";
-    resultDiv.classList.remove("hidden");
-    resultDiv.innerHTML = `<div class="loading-text">${text}</div>`;
-  };
-
-  const showError = (msg) => {
-    exportSection.style.display = "none";
-    resultDiv.classList.remove("hidden");
-    resultDiv.innerHTML = `
-      <div style="color: #fca5a5; padding: 1rem; text-align: center; background: rgba(239, 68, 68, 0.1); border-radius: 8px; border: 1px solid rgba(239,68,68,0.2);">
-        ${msg}
-      </div>
-    `;
-  };
-
-  const showToast = (msg) => {
-    const toast = document.createElement("div")
-    toast.textContent = msg
-    toast.style.cssText = "position:fixed;bottom:20px;right:20px;background:#1e1e2e;color:#fff;padding:12px 20px;border-radius:8px;border:1px solid rgba(255,255,255,0.1);font-size:0.85rem;z-index:9999;"
-    document.body.appendChild(toast)
-    setTimeout(() => toast.remove(), 3000)
+// ── Toast ──────────────────────────────────────────────────
+function showToast(msg) {
+  let t = document.querySelector(".toast");
+  if (!t) {
+    t = document.createElement("div");
+    t.className = "toast";
+    document.body.appendChild(t);
   }
+  t.textContent = msg;
+  t.classList.add("show");
+  setTimeout(() => t.classList.remove("show"), 2200);
+}
 
-  btnDetect.addEventListener("click", async () => {
-    const text = inputText.value.trim();
-    if (!text) {
-      showError("Please enter some text first.");
-      return;
-    }
+// ── Word count ─────────────────────────────────────────────
+inputText.addEventListener("input", () => {
+  const words = inputText.value.trim().split(/\s+/).filter(Boolean).length;
+  wordCountIn.textContent = words + " words";
+});
 
-    showLoading("Running AI Detection...");
-
-    try {
-      const response = await fetch("http://localhost:8000/detect", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text })
-      });
-
-      if (!response.ok) {
-        let errorMsg = `HTTP error! status: ${response.status}`;
-        try {
-          const errData = await response.json();
-          if (errData.detail) errorMsg = errData.detail;
-        } catch (e) { }
-        throw new Error(errorMsg);
-      }
-      const data = await response.json();
-
-      const isAI = data.ai_percent > 50;
-      const badgeClass = isAI ? 'ai-brand' : 'human-brand';
-
-      resultDiv.innerHTML = `
-        <div class="detect-header">
-          <div class="detect-label">Analysis Result</div>
-          <div class="badge ${badgeClass}">${data.label}</div>
-        </div>
-        
-        <div class="donut-container">
-          <div class="donut-chart-wrapper">
-            <div class="donut-chart" style="--human-val: 0"></div>
-            <div class="donut-hole-text">
-              <div class="donut-score-label">AI Score</div>
-              <div class="donut-score-value">${data.ai_percent}%</div>
-            </div>
-          </div>
-          
-          <div class="donut-legend">
-            <div class="legend-item">
-              <div class="legend-dot ai"></div>
-              <span>AI</span>
-            </div>
-            <div class="legend-item">
-              <div class="legend-dot human"></div>
-              <span>Human</span>
-            </div>
-          </div>
-        </div>
-      `;
-
-      // Trigger animations
-      setTimeout(() => {
-        const chart = resultDiv.querySelector('.donut-chart');
-        if (chart) {
-          chart.style.setProperty('--human-val', data.human_percent);
-        }
-      }, 50);
-
-    } catch (err) {
-      showError("Error connecting to backend: " + err.message);
-    }
-  });
-
-  btnHumanize.addEventListener("click", async () => {
-    const text = inputText.value.trim();
-    if (!text) {
-      showError("Please enter some text first.");
-      return;
-    }
-
-    showLoading("Humanizing text... This may take a minute for long documents.");
-
-    try {
-      const response = await fetch("http://localhost:8000/humanize", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text, strength: selectedStrength })
-      });
-
-      if (!response.ok) {
-        let errorMsg = `HTTP error! status: ${response.status}`;
-        try {
-          const errData = await response.json();
-          if (errData.detail) errorMsg = errData.detail;
-        } catch (e) { }
-        throw new Error(errorMsg);
-      }
-      const data = await response.json();
-
-      humanizedText = data.humanized;
-      resultDiv.innerHTML = `
-        <div class="humanize-result">
-          ${data.humanized.replace(/\n/g, '<br/>')}
-        </div>
-      `;
-      exportSection.style.display = "flex";
-    } catch (err) {
-      showError("Error connecting to backend: " + err.message);
-    }
-  });
-
-  fileUpload.addEventListener("change", async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    const originalText = inputText.value;
-    inputText.value = "Extracting text from file, please wait...";
-
+// ── File upload ────────────────────────────────────────────
+fileUpload.addEventListener("change", async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  showLoading("Extracting text…");
+  try {
     const formData = new FormData();
     formData.append("file", file);
-
-    try {
-      const response = await fetch("http://localhost:8000/extract", {
-        method: "POST",
-        body: formData
-      });
-
-      if (!response.ok) {
-        let errorMsg = `HTTP error! status: ${response.status}`;
-        try {
-          const errData = await response.json();
-          if (errData.detail) errorMsg = errData.detail;
-        } catch (e) { }
-        throw new Error(errorMsg);
-      }
-
-      const data = await response.json();
-      inputText.value = data.text;
-    } catch (err) {
-      inputText.value = originalText;
-      showError("Error extracting text: " + err.message);
-    }
-
-    // Clear input so selecting the same file again triggers change event
-    e.target.value = "";
-  });
-
-  // Export TXT purely via JS blob
-  btnExportTxt.addEventListener("click", () => {
-    if (!humanizedText) return;
-    const blob = new Blob([humanizedText], { type: "text/plain" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "humanized.txt";
-    a.click();
-    URL.revokeObjectURL(url);
-    showToast("✅ Downloaded! Check your Downloads folder.");
-  });
-
-  // Generic export fetcher for endpoint downloads
-  const exportDocAndDownload = async (url, filename) => {
-    if (!humanizedText) return;
-    btnExportDocx.disabled = true;
-    btnExportPdf.disabled = true;
-    try {
-      const response = await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text: humanizedText })
-      });
-      if (!response.ok) throw new Error("Export completely failed");
-
-      const blob = await response.blob();
-      const downloadUrl = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = downloadUrl;
-      a.download = filename;
-      a.click();
-      URL.revokeObjectURL(downloadUrl);
-    } catch (err) {
-      showError("Export Error: " + err.message);
-    } finally {
-      btnExportDocx.disabled = false;
-      btnExportPdf.disabled = false;
-    }
-  };
-
-  btnExportDocx.addEventListener("click", () => exportDocAndDownload("http://localhost:8000/export/docx", "humanized.docx"));
-  btnExportPdf.addEventListener("click", () => exportDocAndDownload("http://localhost:8000/export/pdf", "humanized.pdf"));
+    const res = await fetch(`${API_BASE}/extract`, { method: "POST", body: formData });
+    const data = await res.json();
+    inputText.value = data.text;
+    const words = data.text.trim().split(/\s+/).filter(Boolean).length;
+    wordCountIn.textContent = words + " words";
+    showToast("File extracted ✓");
+  } catch {
+    showToast("Failed to extract file.");
+  } finally {
+    hideLoading();
+    fileUpload.value = "";
+  }
 });
+
+// ── Detect ─────────────────────────────────────────────────
+detectBtn.addEventListener("click", async () => {
+  if (!inputText.value.trim()) { showToast("Paste some text first."); return; }
+  showLoading("Analysing text…");
+  try {
+    const res = await fetch(`${API_BASE}/detect`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text: inputText.value })
+    });
+    const data = await res.json();
+    renderDetect(data.ai_percent / 100);
+  } catch {
+    showToast("Detection failed. Try again.");
+  } finally {
+    hideLoading();
+  }
+});
+
+// ── Humanize ───────────────────────────────────────────────
+humanizeBtn.addEventListener("click", async () => {
+  if (!inputText.value.trim()) { showToast("Paste some text first."); return; }
+  showLoading("Humanizing your text…");
+  try {
+    const res = await fetch(`${API_BASE}/humanize`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text: inputText.value, strength: strengthSelect.value || "light" })
+    });
+    const data = await res.json();
+    outputText.value = data.humanized;
+    const words = data.humanized.trim().split(/\s+/).filter(Boolean).length;
+    wordCountOut.textContent = words + " words";
+    showToast("Humanized ✓");
+  } catch {
+    showToast("Humanization failed. Try again.");
+  } finally {
+    hideLoading();
+  }
+});
+
+// ── Copy ───────────────────────────────────────────────────
+copyBtn.addEventListener("click", () => {
+  if (!outputText.value.trim()) { showToast("Nothing to copy yet."); return; }
+  navigator.clipboard.writeText(outputText.value);
+  showToast("Copied to clipboard ✓");
+});
+
+// ── Export TXT ─────────────────────────────────────────────
+exportTxt.addEventListener("click", () => {
+  if (!outputText.value.trim()) { showToast("Nothing to export yet."); return; }
+  const blob = new Blob([outputText.value], { type: "text/plain" });
+  triggerDownload(blob, "humanized.txt");
+  showToast("Downloaded .txt ✓");
+});
+
+// ── Export DOCX ────────────────────────────────────────────
+exportDocx.addEventListener("click", async () => {
+  if (!outputText.value.trim()) { showToast("Nothing to export yet."); return; }
+  showLoading("Generating DOCX…");
+  try {
+    const res = await fetch(`${API_BASE}/export/docx`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text: outputText.value })
+    });
+    const blob = await res.blob();
+    triggerDownload(blob, "humanized.docx");
+    showToast("Downloaded .docx ✓");
+  } catch {
+    showToast("DOCX export failed.");
+  } finally {
+    hideLoading();
+  }
+});
+
+// ── Export PDF ─────────────────────────────────────────────
+exportPdf.addEventListener("click", async () => {
+  if (!outputText.value.trim()) { showToast("Nothing to export yet."); return; }
+  showLoading("Generating PDF…");
+  try {
+    const res = await fetch(`${API_BASE}/export/pdf`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text: outputText.value })
+    });
+    const blob = await res.blob();
+    triggerDownload(blob, "humanized.pdf");
+    showToast("Downloaded .pdf ✓");
+  } catch {
+    showToast("PDF export failed.");
+  } finally {
+    hideLoading();
+  }
+});
+
+// ── Helpers ────────────────────────────────────────────────
+function triggerDownload(blob, filename) {
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(a.href);
+}

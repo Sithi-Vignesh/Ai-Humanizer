@@ -1,88 +1,186 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 
 <head>
   <meta charset="UTF-8" />
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AI Humanizer & Detector</title>
-  <script type="module" src="/main.js" defer></script>
+  <title>AI Humanizer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
 </head>
 
 <body>
-  <div class="background-glow"></div>
-  <main class="app-container">
-    <header class="header" style="grid-column: 1 / -1;">
-      <h1>AI Humanizer & Detector</h1>
-      <p class="subtitle">Analyze and refine your text with ease</p>
-    </header>
 
-    <div class="left-pane">
-      <div class="input-section">
-        <textarea id="input-text" rows="8" placeholder="Paste your text here..."></textarea>
-        <div class="strength-selector-wrapper">
-          <span class="strength-label">Humanize Strength:</span>
-          <div id="strength-selector" class="pill-selector">
-            <button class="strength-btn" data-level="light">Light</button>
-            <button class="strength-btn active" data-level="medium">Medium</button>
-            <button class="strength-btn" data-level="heavy">Heavy</button>
-          </div>
-        </div>
-        <div class="file-upload-wrapper" style="margin-top: 1rem; text-align: right;">
-          <label for="file-upload" class="btn"
-            style="display: inline-flex; width: auto; background-color: rgba(255,255,255,0.05); border: 1px dashed rgba(255,255,255,0.2); color: var(--text-secondary); cursor: pointer; padding: 0.5rem 1rem; font-size: 0.85rem;">
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
-              <path
-                d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z" />
-              <path
-                d="M7.646 1.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 2.707V11.5a.5.5 0 0 1-1 0V2.707L5.354 4.854a.5.5 0 1 1-.708-.708l3-3z" />
-            </svg>
-            Upload Document (.pdf, .docx)
-          </label>
-          <input type="file" id="file-upload" accept=".pdf,.docx" style="display: none;" />
-          <div style="margin-top: 0.5rem; font-size: 0.75rem; color: rgba(255,255,255,0.4); text-align: right;">
-            ⚠️ Note: Only text content will be preserved. Images, tables, and formatting will not be carried over.
-          </div>
-        </div>
+  <header class="header">
+    <div class="header-inner">
+      <div class="brand">
+        <span class="brand-icon">✦</span>
+        <span class="brand-name">AI <em>Humanizer</em></span>
       </div>
-
-      <div class="actions" style="margin-top: 1rem;">
-        <button id="btn-detect" class="btn btn-detect">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-            <path
-              d="M11.251.068a.5.5 0 0 1 .227.58L9.677 6.5H13a.5.5 0 0 1 .364.843l-8 8.5a.5.5 0 0 1-.842-.49L6.323 9.5H3a.5.5 0 0 1-.364-.843l8-8.5a.5.5 0 0 1 .615-.09z" />
-          </svg>
-          Detect AI
-        </button>
-        <button id="btn-humanize" class="btn btn-humanize">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-            <path
-              d="M15.5 8.516a7.5 7.5 0 1 1-9.462-7.24A1 1 0 0 1 7 0h2a1 1 0 0 1 .962 1.276 7.503 7.503 0 0 1 5.538 7.24zm-1.5 0a6.5 6.5 0 1 0-7.859-6.381A2.001 2.001 0 0 0 8 4h.001a2 2 0 0 0 1.858-1.865A6.5 6.5 0 0 0 14 8.516z" />
-          </svg>
-          Humanize
+      <div class="header-right">
+        <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+          <span class="sun">☀️</span>
+          <span class="moon">🌙</span>
         </button>
       </div>
     </div>
+  </header>
 
-    <div class="right-pane" style="display: flex; flex-direction: column;">
-      <div id="result" class="result-area hidden" style="flex: 1;"></div>
+  <main class="main">
 
-      <div id="export-section" class="actions"
-        style="display: none; margin-top: auto; border-top: 1px solid var(--border); padding-top: 1rem; gap: 0.5rem; justify-content: center; align-items: center;">
-        <span style="color: var(--text-secondary); font-size: 0.9rem; font-weight: 500; margin-right: 0.5rem;">Export
-          as:</span>
-        <button id="btn-export-txt" class="btn"
-          style="flex: unset; padding: 0.5rem 1.25rem; background-color: rgba(255,255,255,0.05); border: 1px solid var(--border);">TXT</button>
-        <button id="btn-export-docx" class="btn"
-          style="flex: unset; padding: 0.5rem 1.25rem; background-color: rgba(255,255,255,0.05); border: 1px solid var(--border);">DOCX</button>
-        <button id="btn-export-pdf" class="btn"
-          style="flex: unset; padding: 0.5rem 1.25rem; background-color: rgba(255,255,255,0.05); border: 1px solid var(--border);">PDF</button>
+    <section class="hero">
+      <h1>Make AI text sound <em>human.</em></h1>
+      <p class="hero-sub">Paste your text, upload a document, or start typing — we'll handle the rest.</p>
+    </section>
+
+    <div class="workspace">
+
+      <!-- LEFT PANEL -->
+      <div class="panel panel-left">
+        <div class="panel-toolbar">
+          <span class="panel-label">Original Text</span>
+          <div class="toolbar-actions">
+            <span class="word-count" id="word-count-in">0 words</span>
+            <label class="upload-btn" for="file-upload" title="Upload PDF or Word file">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                <polyline points="17 8 12 3 7 8" />
+                <line x1="12" y1="3" x2="12" y2="15" />
+              </svg>
+              Upload
+            </label>
+            <input type="file" id="file-upload" accept=".pdf,.docx" hidden />
+          </div>
+        </div>
+        <textarea id="input-text"
+          placeholder="Paste your AI-generated text here, or upload a PDF / Word document above…"
+          spellcheck="false"></textarea>
+
+        <div class="detect-bar" id="detect-bar">
+          <div class="detect-indicator" id="detect-indicator">
+            <div class="indicator-dot" id="indicator-dot"></div>
+            <span id="detect-label">Not analysed yet</span>
+          </div>
+          <button class="btn-detect" id="detect-btn">Analyse</button>
+        </div>
+      </div>
+
+      <!-- CENTER CONTROLS -->
+      <div class="center-col">
+        <div class="strength-group">
+          <span class="strength-label">Strength</span>
+          <div class="strength-pills">
+            <button class="pill active" data-value="light">Light</button>
+            <button class="pill" data-value="medium">Medium</button>
+            <button class="pill" data-value="heavy">Heavy</button>
+          </div>
+        </div>
+        <button class="btn-humanize" id="humanize-btn">
+          <span class="btn-text">Humanize</span>
+          <span class="btn-arrow">→</span>
+        </button>
+      </div>
+
+      <!-- RIGHT PANEL -->
+      <div class="panel panel-right">
+        <div class="panel-toolbar">
+          <span class="panel-label">Humanized Text</span>
+          <div class="toolbar-actions">
+            <span class="word-count" id="word-count-out">0 words</span>
+            <button class="icon-btn" id="copy-btn" title="Copy to clipboard">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+              </svg>
+              Copy
+            </button>
+          </div>
+        </div>
+        <textarea id="output-text" placeholder="Your humanized text will appear here…" readonly
+          spellcheck="false"></textarea>
+
+        <div class="export-bar">
+          <span class="export-label">Export as</span>
+          <button class="export-btn" id="export-txt">.TXT</button>
+          <button class="export-btn" id="export-docx">.DOCX</button>
+          <button class="export-btn" id="export-pdf">.PDF</button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- LOADING OVERLAY -->
+    <div class="loading-overlay" id="loading-overlay" hidden>
+      <div class="loading-card">
+        <div class="spinner"></div>
+        <p id="loading-msg">Humanizing your text…</p>
       </div>
     </div>
+
   </main>
+
+  <footer class="footer">
+    <p>AI Humanizer &nbsp;·&nbsp; Built by Sithi Vignesh</p>
+  </footer>
+
+  <select id="strength" hidden></select>
+
+  <script src="main.js"></script>
+  <script>
+    const themeToggle = document.getElementById("themeToggle");
+    const html = document.documentElement;
+
+    const saved = localStorage.getItem("theme") || "light";
+    html.setAttribute("data-theme", saved);
+
+    themeToggle.addEventListener("click", () => {
+      const current = html.getAttribute("data-theme");
+      const next = current === "light" ? "dark" : "light";
+      html.setAttribute("data-theme", next);
+      localStorage.setItem("theme", next);
+    });
+
+    // Strength pills
+    const pills = document.querySelectorAll(".pill");
+    const strengthHidden = document.getElementById("strength");
+    strengthHidden.value = "light";
+
+    pills.forEach(pill => {
+      pill.addEventListener("click", () => {
+        pills.forEach(p => p.classList.remove("active"));
+        pill.classList.add("active");
+        strengthHidden.value = pill.dataset.value;
+      });
+    });
+
+    // Loading overlay helpers
+    window.showLoading = (msg) => {
+      document.getElementById("loading-msg").textContent = msg || "Processing…";
+      document.getElementById("loading-overlay").removeAttribute("hidden");
+    };
+    window.hideLoading = () => {
+      document.getElementById("loading-overlay").setAttribute("hidden", "");
+    };
+
+    // Detection result rendering
+    const origDetect = window.renderDetect;
+    function renderDetect(prob) {
+      const pct = (prob * 100).toFixed(1);
+      const dot = document.getElementById("indicator-dot");
+      const label = document.getElementById("detect-label");
+      label.textContent = `${pct}% AI probability`;
+      dot.className = "indicator-dot";
+      if (prob >= 0.7) dot.classList.add("dot-high");
+      else if (prob >= 0.4) dot.classList.add("dot-mid");
+      else dot.classList.add("dot-low");
+    }
+    window.renderDetect = renderDetect;
+  </script>
 </body>
 
 </html>
