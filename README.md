@@ -6,10 +6,15 @@ A full-stack desktop application that detects AI-generated text and humanizes it
 
 ## ⬇️ Download
 
-> 📦 [Download AI-Humanizer v1.0.0](https://drive.google.com/file/d/14n7yFhaE3OyHodTnsZ5-z_rSnQBtiQWg/view?usp=sharing)
-**Requirements:** Windows 10/11 (64-bit) · Python 3.10+ · Free [Groq API key](https://console.groq.com)
+> 📦 [Download AI-Humanizer v1.0.0 Installer](https://github.com/Sithi-Vignesh/Ai-Humanizer/releases/tag/v1.0.0)
 
-See `README.txt` inside the zip for full setup instructions.
+**Requirements:** Windows 10/11 (64-bit) · Free [Groq API key](https://console.groq.com)
+
+### Installation
+1. Download `AI-Humanizer_1.0.0_x64-setup.exe` from the link above
+2. Run the installer
+3. Launch **AI-Humanizer** from the Start Menu or Desktop shortcut
+4. The backend starts automatically — no manual setup needed
 
 ---
 
@@ -20,7 +25,7 @@ See `README.txt` inside the zip for full setup instructions.
 - **File Upload Support** — extract and analyze text from PDF and DOCX files
 - **Export Results** — download humanized text as TXT, PDF, or DOCX
 - **Chunk-based Processing** — paragraph-by-paragraph processing for accurate long document handling
-- **One-click Launch** — `Start AI-Humanizer.bat` starts backend and app automatically
+- **Auto-launch Backend** — backend starts automatically when the app opens, no terminal needed
 
 ---
 
@@ -45,11 +50,10 @@ Ai-Humanizer/
 │   ├── main.py                       # FastAPI — detect, humanize, extract, export
 │   ├── requirements.txt
 │   └── models/
-│       └── ai-detector-model-v3/     # Fine-tuned RoBERTa (not in repo — in release zip)
+│       └── ai-detector-model-v3/     # Fine-tuned RoBERTa (not in repo — too large)
 ├── frontend/
 │   ├── src/                          # Vanilla JS frontend
 │   └── src-tauri/                    # Tauri + Rust config
-└── Start AI-Humanizer.bat            # One-click launcher
 ```
 
 ---
@@ -83,7 +87,7 @@ Detection uses a fine-tuned `roberta-base` model trained on 50,000 balanced samp
 
 - **Accuracy:** 99.71% on 10k test set
 - **Training:** 3 epochs on Google Colab
-- **Note:** Model is included in the release zip but excluded from the repo due to size (~4GB)
+- **Note:** Model is excluded from the repo due to size (~4GB) but bundled in the installer
 
 ---
 
@@ -101,7 +105,7 @@ uvicorn main:app --reload
 ```bash
 cd frontend
 npm install
-npm run tauri dev
+npx tauri dev
 ```
 
 ---
