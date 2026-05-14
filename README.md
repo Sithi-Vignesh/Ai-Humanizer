@@ -6,15 +6,17 @@ A full-stack desktop application that detects AI-generated text and humanizes it
 
 ## ⬇️ Download
 
-> 📦 [Download AI-Humanizer v1.0.0 Installer](https://github.com/Sithi-Vignesh/Ai-Humanizer/releases/tag/v1.0.0)
+> 📦 [Download AI-Humanizer v1.0.0](https://github.com/Sithi-Vignesh/Ai-Humanizer/releases/tag/v1.0.0)
 
 **Requirements:** Windows 10/11 (64-bit) · Free [Groq API key](https://console.groq.com)
 
 ### Installation
-1. Download `AI-Humanizer_1.0.0_x64-setup.exe` from the link above
-2. Run the installer
-3. Launch **AI-Humanizer** from the Start Menu or Desktop shortcut
-4. The backend starts automatically — no manual setup needed
+1. Download `AI-Humanizer-v1.0.0.zip` from the link above
+2. Extract the folder anywhere on your PC
+3. Open the `backend/` folder
+4. Rename `.env.example` to `.env`
+5. Paste your Groq API key inside
+6. Run `AI-Humanizer.exe`
 
 ---
 
@@ -87,7 +89,7 @@ Detection uses a fine-tuned `roberta-base` model trained on 50,000 balanced samp
 
 - **Accuracy:** 99.71% on 10k test set
 - **Training:** 3 epochs on Google Colab
-- **Note:** Model is excluded from the repo due to size (~4GB) but bundled in the installer
+- **Note:** Model is excluded from the repo due to size but bundled inside the zip release
 
 ---
 
