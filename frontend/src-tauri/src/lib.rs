@@ -8,12 +8,16 @@ pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_fs::init())
-        .setup(|app| {
-            let backend_path = std::path::Path::new(
-                r"C:\Users\sithi\Coding\AI-Humanizer-Release\backend\ai-humanizer-backend.exe"
-            );
+        .setup(|_app| {
+            let exe_dir = std::env::current_exe()
+                .unwrap()
+                .parent()
+                .unwrap()
+                .to_path_buf();
 
-            std::process::Command::new(backend_path)
+            let backend_path = exe_dir.join("backend").join("ai-humanizer-backend.exe");
+
+            std::process::Command::new(&backend_path)
                 .current_dir(backend_path.parent().unwrap())
                 .spawn()
                 .expect("failed to spawn backend");
