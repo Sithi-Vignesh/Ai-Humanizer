@@ -10,7 +10,7 @@ A full-stack application that detects AI-generated text and humanizes it with ad
 
 - Backend hosted on **Render** (FastAPI)
 - Frontend hosted on **GitHub Pages**
-- Detection powered by **Groq LLaMA 3.3 70B**
+- Detection and humanization powered by **OpenRouter**
 - No setup needed — just open and use
 
 ---
@@ -19,22 +19,22 @@ A full-stack application that detects AI-generated text and humanizes it with ad
 
 > 📦 [Download AI-Humanizer v1.0.0](https://github.com/Sithi-Vignesh/Ai-Humanizer/releases/tag/v1.0.0)
 
-**Requirements:** Windows 10/11 (64-bit) · Free [Groq API key](https://console.groq.com)
+**Requirements:** Windows 10/11 (64-bit) · [OpenRouter API key](https://openrouter.ai)
 
 ### Installation
 1. Download `AI-Humanizer-v1.0.0.zip` from the link above
 2. Extract the folder anywhere on your PC
 3. Open the `backend/` folder
 4. Rename `.env.example` to `.env`
-5. Paste your Groq API key inside
+5. Paste your OpenRouter API key inside
 6. Run `AI-Humanizer.exe`
 
 ---
 
 ## ✨ Features
 
-- **AI Text Detection** — fine-tuned RoBERTa model (desktop) / Groq LLM (web)
-- **3-Level Humanization** — Light, Medium, and Heavy modes via Groq LLaMA 3.3 70B
+- **AI Text Detection** — fine-tuned RoBERTa model (99.71% accuracy, desktop) / OpenRouter LLM (web)
+- **3-Level Humanization** — Light, Medium, and Heavy modes via OpenRouter
 - **File Upload Support** — extract and analyze text from PDF and DOCX files
 - **Export Results** — download humanized text as TXT, PDF, or DOCX
 - **Chunk-based Processing** — paragraph-by-paragraph processing for accurate long document handling
@@ -47,9 +47,9 @@ A full-stack application that detects AI-generated text and humanizes it with ad
 | Layer | Desktop | Web |
 |---|---|---|
 | Backend | FastAPI (local) | FastAPI on Render |
-| AI Detection | Fine-tuned RoBERTa-base (local) | Groq LLaMA 3.3 70B |
-| Humanization | Groq LLaMA 3.3 70B | Groq LLaMA 3.3 70B |
-| Frontend | Tauri + Vanilla JS | Vanilla JS on GitHub Pages |
+| AI Detection | Fine-tuned RoBERTa-base (local) | OpenRouter |
+| Humanization | OpenRouter | OpenRouter |
+| Frontend | React (Vite) | React (Vite) on GitHub Pages |
 | File Processing | PyMuPDF (PDF), python-docx (DOCX) | PyMuPDF (PDF), python-docx (DOCX) |
 | Export | ReportLab (PDF), python-docx (DOCX) | ReportLab (PDF), python-docx (DOCX) |
 
@@ -60,14 +60,16 @@ A full-stack application that detects AI-generated text and humanizes it with ad
 ```
 Ai-Humanizer/
 ├── backend/
-│   ├── main.py                       # Desktop backend (FastAPI + RoBERTa)
-│   ├── main_web.py                   # Web backend (FastAPI + Groq detection)
+│   ├── api/                          # FastAPI route definitions
+│   ├── core/                         # Config, file validation, LLM client
+│   ├── services/                     # Detect, humanize, export logic
+│   ├── main.py                       # Desktop entrypoint (RoBERTa detection)
+│   ├── main_web.py                   # Web entrypoint (OpenRouter detection)
 │   ├── requirements.txt
 │   └── models/
 │       └── ai-detector-model-v3/     # Fine-tuned RoBERTa (not in repo — too large)
-├── frontend/
-│   ├── src/                          # Vanilla JS frontend (desktop)
-│   └── src-tauri/                    # Tauri + Rust config
+├── frontend-new/
+│   └── src/                          # React (Vite) frontend
 ```
 
 ---
@@ -107,27 +109,27 @@ Detection uses a fine-tuned `roberta-base` model trained on 50,000 balanced samp
 
 ## 🚀 Dev Setup
 
-### Desktop Backend
+### Backend (Desktop)
 ```bash
 cd backend
 pip install -r requirements.txt
-cp .env.example .env   # Add your Groq API key
+cp .env.example .env   # Add your OpenRouter API key
 uvicorn main:app --reload
 ```
 
-### Web Backend
+### Backend (Web)
 ```bash
 cd backend
 pip install -r requirements.txt
-cp .env.example .env   # Add your Groq API key
+cp .env.example .env   # Add your OpenRouter API key
 uvicorn main_web:app --reload
 ```
 
 ### Frontend
 ```bash
-cd frontend
+cd frontend-new
 npm install
-npx tauri dev
+npm run dev
 ```
 
 ---
