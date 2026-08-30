@@ -13,5 +13,14 @@ else:
     BASE_DIR = Path(__file__).parent.parent  # backend/core/ -> backend/
 MODEL_PATH: Path = BASE_DIR / "models" / "ai-detector-model-v3"
 
-# ── Environment Variables ──────────────────────────────────────────────────────
-OPENROUTER_API_KEY: str = os.getenv("OPENROUTER_API_KEY", "")
+OPENROUTER_API_KEYS: list[str] = [
+    key for key in [
+        os.getenv("OPENROUTER_API_KEY1"),
+        os.getenv("OPENROUTER_API_KEY2"),
+        os.getenv("OPENROUTER_API_KEY3"),
+        os.getenv("OPENROUTER_API_KEY4"),
+        os.getenv("OPENROUTER_API_KEY5"),
+        os.getenv("OPENROUTER_API_KEY6"),
+    ]
+    if key
+]

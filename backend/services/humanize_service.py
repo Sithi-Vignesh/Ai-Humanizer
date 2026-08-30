@@ -1,6 +1,6 @@
 from fastapi import HTTPException
 
-from core.llm import client, LLM_MODEL
+from core.llm import create_completion, LLM_MODEL
 
 
 # ── Helpers ────────────────────────────────────────────────────────────────────
@@ -25,19 +25,14 @@ def chunk_by_paragraphs(text: str, max_chunk_size: int = 1000) -> list[str]:
 
 # ── Public API ─────────────────────────────────────────────────────────────────
 
-def humanize_text(text: str, strength: str) -> str:
-    """Rewrite *text* at the requested humanisation *strength* and return it."""
+def humanize_text(text: str) -> str:
+    """Rewrite *text* in a natural, conversational human style and return it."""
     if not text.strip():
         return ""
 
-    instructions = {
-        "light": "Keep the tone mostly similar to the original, just fix slight robotic phrasing, adjust grammar smoothly, and resolve disjointed sentences.",
-        "medium": "Rewrite to sound completely natural and human. Use standard contractions, vary sentence length, and remove generic robotic phrasing.",
-        "heavy": "Completely rewrite in a highly conversational, extremely organic style. Sound very human. Use slang where appropriate, strong contractions, and dynamic sentence structure.",
-    }
-    strength_instruction = instructions.get(strength.lower(), instructions["medium"])
     prompt = (
-        f"You are a text rewriter. {strength_instruction} "
+        "You are a text rewriter. Completely rewrite in a highly conversational, extremely organic style. "
+        "Sound very human. Use slang where appropriate, strong contractions, and dynamic sentence structure. "
         "IMPORTANT RULES: Keep ALL content including names, titles, dates, numbers, headings, "
         "and metadata. Do NOT summarize, skip, condense, or remove any content. "
         "Rewrite every single line. Return ONLY the rewritten text, nothing else."
@@ -51,7 +46,7 @@ def humanize_text(text: str, strength: str) -> str:
             humanized_chunks.append(chunk)
             continue
         try:
-            response = client.chat.completions.create(
+            response = create_completion(
                 model=LLM_MODEL,
                 messages=[
                     {"role": "system", "content": prompt},

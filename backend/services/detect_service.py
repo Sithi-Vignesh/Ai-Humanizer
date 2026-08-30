@@ -6,7 +6,7 @@ from fastapi import HTTPException
 from transformers import RobertaForSequenceClassification, RobertaTokenizer
 
 from core.config import MODEL_PATH
-from core.llm import client, LLM_MODEL
+from core.llm import create_completion, LLM_MODEL
 
 # ── RoBERTa model – loaded once at import time (used by detect_with_roberta) ──
 # RobertaTokenizer / RobertaForSequenceClassification with local_files_only=True
@@ -30,7 +30,7 @@ def detect_with_llm(text: str) -> dict:
         return {"label": "Unknown", "score": 0.0, "ai_percent": 0.0, "human_percent": 0.0}
 
     try:
-        llm_response = client.chat.completions.create(
+        llm_response = create_completion(
             model=LLM_MODEL,
             messages=[
                 {
