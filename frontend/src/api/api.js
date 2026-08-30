@@ -45,16 +45,16 @@ export async function detectText(text) {
 
 /**
  * POST /humanize
- * body: { text: string, strength: string }
+ * body: { text: string }
  * returns: { humanized: string }
  */
-export async function humanizeText(text, strength) {
+export async function humanizeText(text) {
   let res;
   try {
     res = await fetch(`${API_BASE}/humanize`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ text, strength }),
+      body: JSON.stringify({ text }),
     });
   } catch (networkErr) {
     const err = new Error('Could not reach the server. Please check your connection.');

@@ -25,7 +25,6 @@ export default function App() {
   const [theme, setTheme] = useState(() => localStorage.getItem('theme') || 'light');
   const [inputText, setInputText] = useState('');
   const [outputText, setOutputText] = useState('');
-  const [strength, setStrength] = useState('light');
   const [isLoading, setIsLoading] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState('');
   // notification: { type, message, technical, retryAction } | null
@@ -111,12 +110,12 @@ export default function App() {
   }, [inputText, showLoading, hideLoading, showNotification]);
 
   // ── Humanize ──────────────────────────────────────────────────────────────
-  // Reads inputText and strength from component state at call time.
+  // Reads inputText from component state at call time.
   const handleHumanizeClick = useCallback(async () => {
     if (!inputText.trim()) { showNotification('success', 'Paste some text first.'); return; }
     showLoading('Humanizing your text…');
     try {
-      const data = await api.humanizeText(inputText, strength);
+      const data = await api.humanizeText(inputText);
       setOutputText(data.humanized);
       showNotification('success', 'Humanized ✓');
     } catch (err) {
@@ -124,7 +123,7 @@ export default function App() {
     } finally {
       hideLoading();
     }
-  }, [inputText, strength, showLoading, hideLoading, showNotification]);
+  }, [inputText, showLoading, hideLoading, showNotification]);
 
   // ── Copy ──────────────────────────────────────────────────────────────────
   // No API call — no retry needed.
@@ -193,8 +192,6 @@ export default function App() {
           />
 
           <CenterControls
-            strength={strength}
-            onStrengthChange={setStrength}
             onHumanizeClick={handleHumanizeClick}
           />
 
