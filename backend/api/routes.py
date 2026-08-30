@@ -19,6 +19,10 @@ class TextInput(BaseModel):
     strength: str = "medium"
 
 
+class HumanizeInput(BaseModel):
+    text: str
+
+
 # ── Detect implementation slot ────────────────────────────────────────────────
 # Set by the entrypoint (main.py or main_web.py) before the server starts.
 
@@ -49,10 +53,10 @@ def detect(data: TextInput):
 
 
 @router.post("/humanize")
-def humanize(data: TextInput):
+def humanize(data: HumanizeInput):
     if not data.text.strip():
         return {"humanized": ""}
-    result = humanize_service.humanize_text(data.text, data.strength)
+    result = humanize_service.humanize_text(data.text)
     return {"humanized": result}
 
 
