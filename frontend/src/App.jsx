@@ -23,6 +23,7 @@ function triggerDownload(blob, filename) {
 export default function App() {
   // ── State ─────────────────────────────────────────────────────────────────
   const [theme, setTheme] = useState(() => localStorage.getItem('theme') || 'light');
+  const [selectedModel, setSelectedModel] = useState(() => localStorage.getItem('selectedModel') || 'minimax/minimax-m3:free');
   const [inputText, setInputText] = useState('');
   const [outputText, setOutputText] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -39,6 +40,10 @@ export default function App() {
     document.documentElement.setAttribute('data-theme', theme);
     localStorage.setItem('theme', theme);
   }, [theme]);
+
+  useEffect(() => {
+    localStorage.setItem('selectedModel', selectedModel);
+  }, [selectedModel]);
 
   const toggleTheme = useCallback(() => {
     setTheme((t) => (t === 'light' ? 'dark' : 'light'));
@@ -115,7 +120,7 @@ export default function App() {
     if (!inputText.trim()) { showNotification('success', 'Paste some text first.'); return; }
     showLoading('Humanizing your text…');
     try {
-      const data = await api.humanizeText(inputText);
+      const data = await api.humanizeText(inputText, selectedModel);
       setOutputText(data.humanized);
       showNotification('success', 'Humanized ✓');
     } catch (err) {
@@ -123,7 +128,7 @@ export default function App() {
     } finally {
       hideLoading();
     }
-  }, [inputText, showLoading, hideLoading, showNotification]);
+  }, [inputText, selectedModel, showLoading, hideLoading, showNotification]);
 
   // ── Copy ──────────────────────────────────────────────────────────────────
   // No API call — no retry needed.
@@ -193,6 +198,8 @@ export default function App() {
 
           <CenterControls
             onHumanizeClick={handleHumanizeClick}
+            selectedModel={selectedModel}
+            onModelChange={setSelectedModel}
           />
 
           <OutputPanel
