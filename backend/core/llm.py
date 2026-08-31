@@ -4,6 +4,14 @@ from core.config import OPENROUTER_API_KEYS
 
 LLM_MODEL: str = "minimax/minimax-m3:free"
 
+ALLOWED_MODELS: set[str] = {
+    "minimax/minimax-m3:free",
+    "z-ai/glm-5.2:free",
+    "nvidia/nemotron-3-super-120b-a12b:free",
+    "google/gemma-4-31b-it:free",
+    "liquid/lfm-2.5-2.6b:free",
+}
+
 current_key_index = 0
 client: OpenRouterClient = None
 

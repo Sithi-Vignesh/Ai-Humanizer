@@ -1,6 +1,6 @@
 from fastapi import HTTPException
 
-from core.llm import create_completion, LLM_MODEL
+from core.llm import create_completion, LLM_MODEL, ALLOWED_MODELS
 
 
 # ── Helpers ────────────────────────────────────────────────────────────────────
@@ -25,10 +25,21 @@ def chunk_by_paragraphs(text: str, max_chunk_size: int = 1000) -> list[str]:
 
 # ── Public API ─────────────────────────────────────────────────────────────────
 
-def humanize_text(text: str) -> str:
+def humanize_text(text: str, model: str | None = None) -> str:
     """Rewrite *text* in a natural, conversational human style and return it."""
     if not text.strip():
         return ""
+
+    if model is not None and model not in ALLOWED_MODELS:
+        raise HTTPException(
+            status_code=400,
+            detail={
+                "message": "Unrecognized model. Please select one of the provided models.",
+                "technical": f"Invalid model: {model}",
+            },
+        )
+
+    resolved_model = model if model is not None else LLM_MODEL
 
     prompt = (
         "You are a text rewriter. Completely rewrite in a highly conversational, extremely organic style. "
@@ -47,7 +58,7 @@ def humanize_text(text: str) -> str:
             continue
         try:
             response = create_completion(
-                model=LLM_MODEL,
+                model=resolved_model,
                 messages=[
                     {"role": "system", "content": prompt},
                     {"role": "user", "content": chunk},

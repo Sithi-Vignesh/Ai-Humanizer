@@ -21,6 +21,7 @@ class TextInput(BaseModel):
 
 class HumanizeInput(BaseModel):
     text: str
+    model: str | None = None
 
 
 # ── Detect implementation slot ────────────────────────────────────────────────
@@ -56,7 +57,7 @@ def detect(data: TextInput):
 def humanize(data: HumanizeInput):
     if not data.text.strip():
         return {"humanized": ""}
-    result = humanize_service.humanize_text(data.text)
+    result = humanize_service.humanize_text(data.text, model=data.model)
     return {"humanized": result}
 
 
